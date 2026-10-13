@@ -30,15 +30,15 @@ vars = np.array([
 logvar = [1,2,4,5]
 vars[logvar] = np.log10(vars[logvar])
 
-spec = []
-freqs = []
+spec = []        # Spectra
+nu = []          # Frequencies
 bands = 'LSCXK'
 for band in bands:
     fgdir = './fit_26.01.2017/gauss/'
     spec = np.append(spec, np.loadtxt(fgdir + f'spec_{band}.txt'))
-    freqs = np.append(freqs, np.loadtxt(fgdir + f'freqs_{band}.txt'))
+    nu = np.append(nu, np.loadtxt(fgdir + f'freqs_{band}.txt'))
 
-nu = freqs
+# nu = freqs
 
 #
 # The following three arrays MUST be determined and passed to imgpu.Mcgpu.
@@ -59,8 +59,12 @@ sys.exit(0)
 # work are created and initialized. They are the rspc 'attributes'
 # and they are accessible as rspc.<attributte-name>.
 #
+# coor: set of frequencies, nu
+# dat:  spectra
+#
 
-rspc = imgpu.Mcgpu(pdescr=pdescr1, pmint=pmint1, pmaxt=pmaxt1)
+rspc = imgpu.Mcgpu(pdescr=pdescr1, pmint=pmint1, pmaxt=pmaxt1,
+                   coor=nu, dat=spec)
 
 #
 # The burnin_and_search() method does everything. 

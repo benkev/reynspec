@@ -62,7 +62,22 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     // with its respective value in mc->dat[id] to be used in the chi^2
     // calculation.
     //
+
+    float nu, Sv;
+    float theta0 = mc->pcur[ipt++];
+    float lambda1 = mc->pcur[ipt++];
+    float T0 = mc->pcur[ipt++];
+    float psi = mc->pcur[ipt++];
+    float r0 = mc->pcur[ipt++];
+    float ymax = mc->pcur[ipt];
+
+    nu = mc->coor[id];    // A frequency
+
+    Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, d);
     
+    mc->datm[imd] = Sv * Sv;   // Sv^2
+        
+        
    return 1;
 }
 
