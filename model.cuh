@@ -71,6 +71,21 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     float r0 = mc->pcur[ipt++];
     float ymax = mc->pcur[ipt];
 
+    //
+    // Better:
+    //
+    // float theta0, lambda1, T0, psi, r0, ymax;
+    // float *pcur = &mc->pcur[ipt];
+    // theta0 = *pcur++;
+    // lambda1 = *pcur++;
+    // T0 = *pcur++;
+    // psi = *pcur++;
+    // r0 = *pcur++;
+    // ymax = *pcur;
+    //
+
+
+    
     nu = mc->coor[id];    // A frequency
 
     Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, d);
@@ -132,42 +147,42 @@ __device__ float Sv_func(float theta0, float lambda1, float T0, float psi,
 }
 
 
- nu = freqs;
+ // nu = freqs;
 
- // [numparam, numrealisation,freq]
-__device__ float Sv_func_p(float p[], float nu, float dis):
-    return Sv_func(p[0], p[1], p[2], p[3], p[4], p[5], nu, d);
+//  // [numparam, numrealisation,freq]
+// __device__ float Sv_func_p(float p[], float nu, float dis):
+//     return Sv_func(p[0], p[1], p[2], p[3], p[4], p[5], nu, dis);
 
-__device__ float log_likelihood(float p, float nu, float d):
-    p=p.copy()
-    p[logvar] = 10**p[logvar]
-    Svs = Sv_func_p(p.T[:,None], nu[None], d)
+// __device__ float log_likelihood(float p, float nu, float d):
+//     p=p.copy()
+//     p[logvar] = 10**p[logvar]
+//     Svs = Sv_func_p(p.T[:,None], nu[None], d)
     
-    ressq = abs((Svs**2 - spec**2))
-    res = -0.5*(ressq.sum())/(np.std(spec))**2
-    return res
+//     ressq = abs((Svs**2 - spec**2))
+//     res = -0.5*(ressq.sum())/(np.std(spec))**2
+//     return res
 
-def log_prior(p,variables):
-    linpar = p.copy()
-    linpar[logvar] = 10**(linpar[logvar])
-    if (linpar <=0).any() :
-        return -np.inf
-    theta = variables[:,1]
-    sigma = abs(variables[:,2]-variables[:,0])
-    r = (p-theta)
-    L = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*r**2/sigma**2)
-    return np.log(L.sum())
+// def log_prior(p,variables):
+//     linpar = p.copy()
+//     linpar[logvar] = 10**(linpar[logvar])
+//     if (linpar <=0).any() :
+//         return -np.inf
+//     theta = variables[:,1]
+//     sigma = abs(variables[:,2]-variables[:,0])
+//     r = (p-theta)
+//     L = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*r**2/sigma**2)
+//     return np.log(L.sum())
 
-def log_probability(p,nu,d, variables):
-    lp = log_prior(p,variables)
-    if not np.isfinite(lp) or np.isnan(lp):
-        return -np.inf
-    ll = log_likelihood(p,nu, d)
-    ret = lp + ll
-    if np.isnan(ret):
-        return -np.inf
-    print(lp, ll)
-    return ret
+// def log_probability(p,nu,d, variables):
+//     lp = log_prior(p,variables)
+//     if not np.isfinite(lp) or np.isnan(lp):
+//         return -np.inf
+//     ll = log_likelihood(p,nu, d)
+//     ret = lp + ll
+//     if np.isnan(ret):
+//         return -np.inf
+//     print(lp, ll)
+//     return ret
 
 
         

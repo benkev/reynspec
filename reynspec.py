@@ -30,6 +30,12 @@ vars = np.array([
 logvar = [1,2,4,5]
 vars[logvar] = np.log10(vars[logvar])
 
+
+
+#
+# Read the observation data into memory: spec: spectra, nu: frequencies.
+#
+
 spec = []        # Spectra
 nu = []          # Frequencies
 bands = 'LSCXK'
