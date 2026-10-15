@@ -1,13 +1,13 @@
-Application: template.py
+Application: reynspec.py
 
 Build:
 $ make 
 
 Usage:
 $ ipython --pylab
-  %run template.py 
+  %run reynspec.py
 
 or
 
-$ python template.py
+$ python reynspec.py
 
