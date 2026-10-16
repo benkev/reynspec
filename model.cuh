@@ -1,32 +1,29 @@
 //
 // model.cuh
 //
-// This is a template model file.
-//
 // The result - a single number - is stored in datm[imd].
 //
 
 #include <cuda_runtime.h>
 
-//
-// For convenience and brevity, define the variable and coefficient names
-// (BE CAREFUL not to mix with the names in src/gpu_mcmc.cu !!!
-// To avoid the mess, always undefine the names after use!):
-//
-// For example:
-//
-#define THETA0  (mc->pcur[ipt++])
-#define LAMBDA1 (mc->pcur[ipt++])
-#define T0  (mc->pcur[ipt++])
-#define PSI (mc->pcur[ipt++])
-#define R0  (mc->pcur[ipt++])
-#define YMAX (mc->pcur[ipt])
+__device__ float planck(float T, float nu);
+__device__ float y1_func(float theta0, float lambda1, float T0,
+                         float psi, float nu);
+__device__ float Sv_func(float theta0, float lambda1, float T0, float psi,
+                         float r0, float ymax, float nu, float d);
 
-// #define V2 (mc->pcur[ipt])
-// #define C1 (mc->coor[0])
-// #define C2 (mc->coor[1])
-// #define K (mc->idat[0])
-// #define K1 (mc->idat[1])
+
+
+static constexpr float ak = 0.212f;
+static constexpr float myu = 1.67e-24f; // * u.g
+static constexpr float h = 6.626e-27f;  // erg-sec, Planck constant
+static constexpr float k = 1.38e-16f;   // erg/deg, Boltzmann constant
+static constexpr float c = 3e10f;       // cm/sec,  Speed of light
+static constexpr float c2 = 9e20f;       // cm^2/sec^2,  Speed of light squared
+static constexpr float dist = 5.49e21f;
+
+ 
+//
 
 __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
 
@@ -64,15 +61,15 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     //
 
     float nu, Sv;
-    float theta0 = mc->pcur[ipt++];
+    float theta0 =  mc->pcur[ipt++];
     float lambda1 = mc->pcur[ipt++];
-    float T0 = mc->pcur[ipt++];
-    float psi = mc->pcur[ipt++];
-    float r0 = mc->pcur[ipt++];
-    float ymax = mc->pcur[ipt];
+    float T0 =      mc->pcur[ipt++];
+    float psi =     mc->pcur[ipt++];
+    float r0 =      mc->pcur[ipt++];
+    float ymax =    mc->pcur[ipt];
 
     //
-    // Better:
+    // Better?:
     //
     // float theta0, lambda1, T0, psi, r0, ymax;
     // float *pcur = &mc->pcur[ipt];
@@ -88,22 +85,13 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     
     nu = mc->coor[id];    // A frequency
 
-    Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, d);
+    Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, dist);
     
     mc->datm[imd] = Sv * Sv;   // Sv^2
         
         
    return 1;
 }
-
-
-static constexpr float ak = 0.212f;
-static constexpr float myu = 1.67e-24f; // * u.g
-static constexpr float h = 6.626e-27f;  // erg-sec, Planck constant
-static constexpr float k = 1.38e-16f;   // erg/deg, Boltzmann constant
-static constexpr float c = 3e10f;       // cm/sec,  Speed of light
-static constexpr float c2 = 9e20f;       // cm^2/sec^2,  Speed of light squared
-
     
 // Bv - распределение Планка
 // Spectral radiance of a body for frequency ν at absolute temperature T 
@@ -115,25 +103,30 @@ __device__ float planck(float T, float nu) {
 __device__ float y1_func(float theta0, float lambda1, float T0,
                          float psi, float nu) {
     float tanth = tanf(theta0);
-    float tanth = tanf(theta0);
+    float y1;
+
     y1 = ak/(16*myu*myu) * lambda1*lambda1 * powf(T0,-1.35f) * powf(nu,-2.1f);
     y1 *= (1.f + tanth*tanth) / (tanth*tanth);
     y1 *= (sinf(2.f*theta0) * cosf(2.f*psi) + 2.f*theta0) / (2*theta0*theta0);
     y1 = powf(y1, 0.33333333f);
     return y1;
-
+}
 
 
 __device__ float Sv_func(float theta0, float lambda1, float T0, float psi,
                          float r0, float ymax, float nu, float d) {
+    float Sv, y0, y1, thetam, Br;
     float d2 = d*d;
-    float y111 = y1*y1*y1;
-    float y11 = y1*y1, y00 = y0*y0;
+    float y00, y11, y111;
     
     y0 = r0*cosf(psi);
     y1 = y1_func(theta0, lambda1, T0, psi, nu);
     thetam = atan2f(tanf(theta0), cosf(psi));
-   
+    
+    y00 = y0*y0;
+    y11 = y1*y1;
+    y111 = y11*y1;
+    
     Br = planck(T0, nu);
 
     if (y1 < y0)
@@ -146,55 +139,3 @@ __device__ float Sv_func(float theta0, float lambda1, float T0, float psi,
     return Sv/1e-23f; // to Jy
 }
 
-
- // nu = freqs;
-
-//  // [numparam, numrealisation,freq]
-// __device__ float Sv_func_p(float p[], float nu, float dis):
-//     return Sv_func(p[0], p[1], p[2], p[3], p[4], p[5], nu, dis);
-
-// __device__ float log_likelihood(float p, float nu, float d):
-//     p=p.copy()
-//     p[logvar] = 10**p[logvar]
-//     Svs = Sv_func_p(p.T[:,None], nu[None], d)
-    
-//     ressq = abs((Svs**2 - spec**2))
-//     res = -0.5*(ressq.sum())/(np.std(spec))**2
-//     return res
-
-// def log_prior(p,variables):
-//     linpar = p.copy()
-//     linpar[logvar] = 10**(linpar[logvar])
-//     if (linpar <=0).any() :
-//         return -np.inf
-//     theta = variables[:,1]
-//     sigma = abs(variables[:,2]-variables[:,0])
-//     r = (p-theta)
-//     L = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*r**2/sigma**2)
-//     return np.log(L.sum())
-
-// def log_probability(p,nu,d, variables):
-//     lp = log_prior(p,variables)
-//     if not np.isfinite(lp) or np.isnan(lp):
-//         return -np.inf
-//     ll = log_likelihood(p,nu, d)
-//     ret = lp + ll
-//     if np.isnan(ret):
-//         return -np.inf
-//     print(lp, ll)
-//     return ret
-
-
-        
-
-
-//
-// Always undefine the names after use!  
-//
-#undef THETA0
-#undef LAMBDA1
-#undef T0
-#undef PSI
-#undef R0
-#undef YMAX
- 
