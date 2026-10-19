@@ -57,7 +57,7 @@ pmint1 = np.array(vars[:,0], dtype=float32)
 pmaxt1 = np.array(vars[:,2], dtype=float32)
 
 
-sys.exit(0)
+# sys.exit(0)
 
 #
 # Create the 'rspc' object of the 'Mcgpu' class.
@@ -70,7 +70,9 @@ sys.exit(0)
 #
 
 rspc = imgpu.Mcgpu(pdescr=pdescr1, pmint=pmint1, pmaxt=pmaxt1,
-                   coor=nu, dat=spec)
+                   coor=nu, dat=spec)   # , nburn=500, niter=1500)
+
+sys.exit(0)
 
 #
 # The burnin_and_search() method does everything. 
@@ -97,14 +99,11 @@ print('pout[:,%d] = ' % (im), pout[:,im])
 # really helpful. Below is the case of only two parameters, x and y.
 #
 											  
-figure(figsize=(12,6))
-subplot(121); hist(pout[0,:], 50, color='b'); grid(1)
-xlabel('x')
-title(r'MCMC Output Distribution for X')
+figure(figsize=(12,8))
 
-subplot(122); hist(pout[1,:], 50, color='b'); grid(1)
-xlabel('y')
-title(r'MCMC Output Distribution for Y')
-
+for ip in range(6):
+    subplot(2,3,ip+1); hist(pout[ip,:], 50, color='b'); grid(1)
+    # xlabel('x')
+    # title(r'MCMC Output Distribution for X')
 
 show()
