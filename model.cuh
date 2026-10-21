@@ -60,7 +60,7 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     // calculation.
     //
 
-    float nu, Sv;
+    float nu, spec, spec2, Sv, Sv2;
     float theta0 =  mc->pcur[ipt++];
     float lambda1 = mc->pcur[ipt++];
     float T0 =      mc->pcur[ipt++];
@@ -86,9 +86,18 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
     nu = mc->coor[id];    // A frequency
 
     Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, dist);
+    Sv2 = Sv * Sv;   // Sv^2
+
+    spec = mc->dat[id];    // A spectrum
+    spec2 = spec * spec;
     
-    mc->datm[imd] = Sv * Sv;   // Sv^2
-        
+    mc->datm[imd] = fabsf(Sv2 - spec2);
+
+    if (imd < 100) 
+        printf("\nid=%d, ipt=%d, imd=%d, ipass=%d\n"                    \
+               "theta0=%g, lambda1=%g, T0=%g, psi=%g, r0=%g, ymax=%g, nu=%g, " \
+               "dist=%g\n", id, ipt, imd, ipass,
+               theta0, lambda1, T0, psi, r0, ymax, nu, dist);
         
    return 1;
 }
