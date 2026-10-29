@@ -12,7 +12,7 @@ import sys
 from numpy import pi, array, float32, int32, uint8, int64, uint64, where, \
      zeros, ones, arange, ones_like, linspace, sqrt, argsort
 from matplotlib.pyplot import figure, plot, subplot, show, hist, grid, axis, \
-	xlabel, ylabel, title
+    xlabel, ylabel, title
 
 ndim = 6
 varnames = ['theta0','lambda1','T0', 'psi','r0', 'ymax']
@@ -77,6 +77,7 @@ sys.exit(0)
 #
 # The burnin_and_search() method does everything. 
 #
+rspc.set_gpu(2)
 
 rspc.burnin_and_search()
 
@@ -98,7 +99,7 @@ print('pout[:,%d] = ' % (im), pout[:,im])
 # Histograms of the all the parameters "random walk" are sometimes
 # really helpful. Below is the case of only two parameters, x and y.
 #
-											  
+                                              
 figure(figsize=(12,8))
 
 for ip in range(6):
