@@ -1,0 +1,19 @@
+[[Fit Statistics]]
+    # fitting method   = Nelder-Mead
+    # function evals   = 2320
+    # data points      = 2480000
+    # variables        = 7
+    chi-square         = 0.29308669
+    reduced chi-square = 1.1818e-07
+    Akaike info crit   = -39558604.8
+    Bayesian info crit = -39558515.8
+##  Warning: uncertainties could not be estimated:
+    sa:        at boundary
+[[Variables]]
+    I:         4.5950e-04 (init = 0.005)
+    center_x: -5.0609e-06 (init = 0)
+    center_y:  2.9508e-08 (init = 0)
+    sa:        0.00550000 (init = 0.04)
+    sb:        0.09084096 (init = 0.04)
+    pa:        0.45580251 (init = 0)
+    alpha:     0.47072322 (init = 0.4)

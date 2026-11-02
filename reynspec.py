@@ -44,7 +44,11 @@ for band in bands:
     spec = np.append(spec, np.loadtxt(fgdir + f'spec_{band}.txt'))
     nu = np.append(nu, np.loadtxt(fgdir + f'freqs_{band}.txt'))
 
-# nu = freqs
+#
+# Save table [nu, spec] as float32 binary file
+#
+nuspect = np.column_stack((nu, spec)).astype(dtype=np.float32)
+nuspect.tofile("test/nuspect.bin")
 
 #
 # The following three arrays MUST be determined and passed to imgpu.Mcgpu.
