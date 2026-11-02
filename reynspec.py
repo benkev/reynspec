@@ -5,7 +5,7 @@
 # Using MCMC on CUDA GPU through the Python class imgpu.Mcgpu.
 #
 
-import imgpu
+# import imgpu
 import numpy as np
 import time
 import sys
@@ -61,7 +61,7 @@ pmint1 = np.array(vars[:,0], dtype=float32)
 pmaxt1 = np.array(vars[:,2], dtype=float32)
 
 
-# sys.exit(0)
+sys.exit(0)
 
 #
 # Create the 'rspc' object of the 'Mcgpu' class.
