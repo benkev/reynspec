@@ -65,7 +65,7 @@ __device__ int model(CCalcModel *mc, int id, int ipt, int imd, int ipass) {
 
     Sv = Sv_func(theta0, lambda1, T0, psi, r0, ymax, nu, dist);
 
-    // mcmc_real nspect = mc->dat[id];    // A spectrum
+    // mcmc_real spect = mc->dat[id];    // A spectrum
 
     mc->datm[imd] = Sv;
 
